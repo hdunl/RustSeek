@@ -186,4 +186,4 @@ fn search_in_zip(
     }
 }
 
-// Author: Hayden Dunlap, Email: hdunlap936@gmail.com, hrdunlap@valdosta.edu, GitHub: github.com/hdunlap
+// Author: Hayden Dunlap, Email: hdunlap936@gmail.com, hrdunlap@valdosta.edu, GitHub: github.com/hdunl
