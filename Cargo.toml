@@ -1,0 +1,13 @@
+[package]
+name = "RustSeek"
+version = "0.1.0"
+edition = "2021"
+
+
+
+[dependencies]
+ignore = "0.4"
+num_cpus = "1.13"
+rayon = "1.5"
+zip = "0.5"
+termcolor = "1.2"
