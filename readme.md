@@ -1,5 +1,5 @@
 
-# Rust File Searching Program
+# RustSeek
 
 ## Overview
 
