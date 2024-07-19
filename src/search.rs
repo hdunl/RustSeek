@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 use std::sync::mpsc::{self, Sender};
 use std::sync::{Arc, Mutex};
 use std::thread;
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 use ignore::{WalkBuilder, WalkState};
 use rayon::prelude::*;
@@ -13,7 +13,7 @@ pub struct Search {
     rx: Box<dyn Iterator<Item = String>>,
     pub num_results: Arc<Mutex<usize>>,
     pub num_files_processed: Arc<Mutex<usize>>,
-    pub duration: std::time::Duration,
+    pub duration: Arc<Mutex<Option<Duration>>>,
 }
 
 impl Iterator for Search {
@@ -39,13 +39,18 @@ impl Search {
         let tx_clone = tx.clone();
         let num_results = Arc::new(Mutex::new(0));
         let num_files_processed = Arc::new(Mutex::new(0));
+        let duration = Arc::new(Mutex::new(None));
 
         let start_time = Instant::now();
 
         let num_results_clone = Arc::clone(&num_results);
         let num_files_processed_clone = Arc::clone(&num_files_processed);
+        let duration_clone = Arc::clone(&duration);
         thread::spawn(move || {
             search_in_directory(location, search_input_clone.as_deref(), tx_clone, num_results_clone, num_files_processed_clone);
+            let elapsed = start_time.elapsed();
+            let mut duration = duration_clone.lock().unwrap();
+            *duration = Some(elapsed);
         });
 
         if search_zip {
@@ -55,12 +60,14 @@ impl Search {
 
             let num_results_clone = Arc::clone(&num_results);
             let num_files_processed_clone = Arc::clone(&num_files_processed);
+            let duration_clone = Arc::clone(&duration);
             thread::spawn(move || {
                 search_for_zip_files(location, search_input, tx, num_results_clone, num_files_processed_clone);
+                let elapsed = start_time.elapsed();
+                let mut duration = duration_clone.lock().unwrap();
+                *duration = Some(elapsed);
             });
         }
-
-        let duration = start_time.elapsed();
 
         Self {
             rx: Box::new(rx.into_iter()),
